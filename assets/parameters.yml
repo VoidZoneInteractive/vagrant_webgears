@@ -1,0 +1,13 @@
+parameters:
+    database_host: 127.0.0.1
+    database_port: null
+    database_name: webgears
+    database_user: root
+    database_password: root
+    mailer_transport: smtp
+    mailer_host: 127.0.0.1
+    mailer_user: null
+    mailer_password: null
+    secret: 034ad0c24d21e37796ff4389a1e2f14bfefc255c
+    database_driver: pdo_mysql
+    database_path: null

@@ -3,18 +3,20 @@
 # Vagran initialization script by Grz3gorz Gurz3da
 
 # Update stuff
-apt-get update
+sudo apt-get update
+
+sudo apt-get install -y git
 
 # Apache module install
 apt-get install -y apache2
 
 # PHP module install
-apt-get install -y php5
-apt-get install -y php5-apcu
-apt-get install -y php5-xdebug
-apt-get install -y php5-mysql
-apt-get install -y php5-curl
-apt-get install -y mc
+sudo apt-get install -y php5
+sudo apt-get install -y php5-apcu
+sudo apt-get install -y php5-xdebug
+sudo apt-get install -y php5-mysql
+sudo apt-get install -y php5-curl
+sudo apt-get install -y mc
 
 # MySQL module install
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password root'
@@ -84,12 +86,25 @@ sudo a2enmod headers
 sudo service apache2 restart
 
 # Remove localhost limitation from dev (very unsafe, only for Vagrant purpose)
-sudo /bin/sed -i "s/header('HTTP\/1.0 403 Forbidden');/\/\/header('HTTP\/1.0 403 Forbidden');/" /vagrant/html/webgears/web/app_dev.php
-sudo /bin/sed -i "s/exit('You are not allowed to access this file. Check '.basename(__FILE__).' for more information.');/\/\/exit('You are not allowed to access this file. Check '.basename(__FILE__).' for more information.');/" /vagrant/html/webgears/web/app_dev.php
+#sudo /bin/sed -i "s/header('HTTP\/1.0 403 Forbidden');/\/\/header('HTTP\/1.0 403 Forbidden');/" /vagrant/html/webgears/web/app_dev.php
+#sudo /bin/sed -i "s/exit('You are not allowed to access this file. Check '.basename(__FILE__).' for more information.');/\/\/exit('You are not allowed to access this file. Check '.basename(__FILE__).' for more information.');/" /vagrant/html/webgears/web/app_dev.php
 
-sudo /bin/sed -i "s/header('HTTP\/1.0 403 Forbidden');/\/\/header('HTTP\/1.0 403 Forbidden');/" /vagrant/html/webgears/web/config.php
-sudo /bin/sed -i "s/exit('This script is only accessible from localhost.');/\/\/exit('This script is only accessible from localhost.');/" /vagrant/html/webgears/web/config.php
+#sudo /bin/sed -i "s/header('HTTP\/1.0 403 Forbidden');/\/\/header('HTTP\/1.0 403 Forbidden');/" /vagrant/html/webgears/web/config.php
+#sudo /bin/sed -i "s/exit('This script is only accessible from localhost.');/\/\/exit('This script is only accessible from localhost.');/" /vagrant/html/webgears/web/config.php
 
 
-cd /vagrant/html/webgears
-sudo php app/console server:start 0.0.0.0:8000
+# Clone project into symfony
+cd /vagrant/
+git clone https://github.com/VoidZoneInteractive/webgears.git
+sudo rsync -avz /vagrant/webgears /vagrant/html
+
+# Link to configuration file
+ln -fs /vagrant/assets/parameters.yml /var/www/html/webgears/app/config/parameters.yml
+
+# Generate entities and database
+php /vagrant/html/webgears/vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php
+php /vagrant/html/webgears/app/console doctrine:generate:entities Webgears
+php /vagrant/html/webgears/app/console doctrine:schema:update --force
+
+# Start developer mode
+#sudo php app/console server:start 0.0.0.0:8000
